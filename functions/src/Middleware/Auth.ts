@@ -1,17 +1,22 @@
-import * as admin from 'firebase-admin'
+import * as Express from 'express';
+import * as admin from 'firebase-admin';
+import {Middleware} from '@decorators/express';
 
-export class Auth {
+export class Auth implements Middleware {
 
-  public firebaseAuth(req, res, next): void {
-    if (req.header('Authorization')) {
-      admin.auth().verifyIdToken(req.header('Authorization'))
-        .then(user => {
-          res.locals.user = user
-          next()
-        })
-        .catch(err => {res.status(401).json(err)})
-    } else {
-      res.status(401).json({ error: 'Authorization header is not found'})
+    async use(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+
+        if (req.header('Authorization')) {
+
+            try {
+                res.locals.user = await admin.auth().verifyIdToken(req.header('Authorization'));
+                next();
+            } catch (err) {
+                res.status(401).json(err);
+            }
+
+        } else {
+            res.status(401).json({error: 'Authorization header is not found'});
+        }
     }
-  }
 }

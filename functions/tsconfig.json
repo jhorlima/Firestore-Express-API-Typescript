@@ -1,14 +1,13 @@
 {
+  "compileOnSave": true,
   "compilerOptions": {
     "lib": ["es6"],
+    "outDir": "lib",
+    "target": "es6",
+    "sourceMap": true,
     "module": "commonjs",
     "noImplicitReturns": true,
-    "outDir": "lib",
-    "sourceMap": true,
-    "target": "es6"
+    "experimentalDecorators": true
   },
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }

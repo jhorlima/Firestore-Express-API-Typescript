@@ -1,34 +1,33 @@
-import * as functions from 'firebase-functions'
-import * as admin from 'firebase-admin'
-import * as express from 'express'
-import * as bodyParser from 'body-parser'
-import { Routes } from './routes/Routes'
-import * as cors from 'cors'
+import * as cors from 'cors';
+import * as express from 'express';
+import * as admin from 'firebase-admin';
+import * as bodyParser from 'body-parser';
+import * as functions from 'firebase-functions';
 
-class Api { 
-  public api: express.Application
-  public app: express.Application
-  public routes: Routes 
+import {Application} from "express";
+import {attachControllers} from '@decorators/express';
 
-  constructor () {
-    this.firebaseSetup()
-    this.app = express()
-    this.api = express()
-    this.config()
-    this.routes = new Routes(this.app)
-  }
+import {ClientController} from './Controllers/ClientController';
+import {GeneralController} from './Controllers/GeneralController';
 
-  private config(): void {
-    this.app.use(cors())
-    this.api.use('/api/v1', this.app)
-    this.api.use(bodyParser.json())
-    this.api.use(bodyParser.urlencoded({ extended: false }))
-  }
+const api: Application = express();
+const appV1: Application = express();
 
-  private firebaseSetup (): void {
-    admin.initializeApp({ credential: admin.credential.applicationDefault() })
-    admin.firestore().settings({ timestampsInSnapshots: true })
-  }
-}
+appV1.use(cors({origin: true}));
+
+api.use(bodyParser.urlencoded({extended: false}));
+api.use(bodyParser.json());
+
+api.use('/api/v1', appV1);
+
+admin.initializeApp({
+    credential: admin.credential.applicationDefault(),
+    databaseURL: 'https://estudo-b21f1.firebaseio.com'
+});
+
+admin.firestore().settings({timestampsInSnapshots: true});
+
+attachControllers(appV1, [ClientController, GeneralController]);
+
 // webApi is your functions name, and you will pass this.api as a parameter
-export const webApi = functions.https.onRequest(new Api().api)
+export const webApiV1 = functions.https.onRequest(api);
